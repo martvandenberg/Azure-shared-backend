@@ -2,6 +2,7 @@
 using Azure.Storage;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Azure.Storage.Sas;
+using Azure.Storage.Blobs.Models;
 
 namespace backendapi
 {
@@ -23,9 +24,18 @@ namespace backendapi
             //string randomkey = new Guid().ToString();
             var blobClient = containerClient.GetBlobClient(Picture.FileName);
 
+            BlobUploadOptions options = new BlobUploadOptions
+            {
+                HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = "image/jpeg",
+                    ContentDisposition = "inline; filename=YourImageName.jpg"
+                }
+            };
+
             using (var stream = Picture.OpenReadStream())
             {
-                var res = await blobClient.UploadAsync(stream);
+                var res = await blobClient.UploadAsync(stream, options);
             }
 
         }

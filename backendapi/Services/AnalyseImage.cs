@@ -1,6 +1,8 @@
 ﻿using Azure.AI.Vision.Common;
 using Azure;
 using Azure.Identity;
+using Azure.AI.Vision.ImageAnalysis;
+using System.Text;
 
 namespace backendapi.Services
 {
@@ -18,68 +20,61 @@ namespace backendapi.Services
 
         public void AnalyseImageWithAi(string urlSasString)
         {
-            Console.WriteLine("Starting image analysing tool Ai");
+            StringBuilder analysisResult = new StringBuilder();
+            analysisResult.AppendLine("Starting image analysing tool Ai");
             Console.WriteLine($"{urlSasString}");
 
             var visionEndpoint = _configuration["ComputerVision:Endpoint"];
             var visionKey = _configuration["ComputerVision:ApiKey"];
 
-
             var serviceOptions = new VisionServiceOptions(
                 visionEndpoint,
-                new DefaultAzureCredential());
+                new AzureKeyCredential(visionKey));
 
 
-            using var imageSource = VisionSource.FromUrl(urlSasString);
-            Console.WriteLine("imagesource: ", imageSource);
+            using var imageSource =  VisionSource.FromUrl(urlSasString);
+            using var imageSource2 = VisionSource.FromUrl("https://aka.ms/azai/vision/image-analysis-sample.jpg");
 
-            //Console.WriteLine("image source: ", imageSource.ToString());
 
-            //var analysisOptions = new ImageAnalysisOptions()
-            //{
-            //    Features = ImageAnalysisFeature.Caption | ImageAnalysisFeature.Text,
 
-            //    Language = "en",
+            var analysisOptions = new ImageAnalysisOptions()
+            {
+                Features = ImageAnalysisFeature.Caption | ImageAnalysisFeature.Text,
 
-            //    GenderNeutralCaption = true
-            //};
+                Language = "en",
 
-            //using var analyzer = new ImageAnalyzer(serviceOptions, imageSource, analysisOptions);
+                GenderNeutralCaption = true
+            };
 
-            //var result = analyzer.Analyze();
+            using var analyzer = new ImageAnalyzer(serviceOptions, imageSource, analysisOptions);
+            var result = analyzer.Analyze();
 
-            //if (result.Reason == ImageAnalysisResultReason.Analyzed)
-            //{
-            //    if (result.Caption != null)
-            //    {
-            //        Console.WriteLine(" Caption:");
-            //        Console.WriteLine($"   \"{result.Caption.Content}\", Confidence {result.Caption.Confidence:0.0000}");
-            //    }
+            if (result.Reason == ImageAnalysisResultReason.Analyzed)
+            {
+                if (result.Caption != null)
+                {
+                    analysisResult.AppendLine($"Caption: \"{result.Caption.Content}\", Confidence {result.Caption.Confidence:0.0000}");
+                }
 
-            //    if (result.Text != null)
-            //    {
-            //        Console.WriteLine($" Text:");
-            //        foreach (var line in result.Text.Lines)
-            //        {
-            //            string pointsToString = "{" + string.Join(',', line.BoundingPolygon.Select(pointsToString => pointsToString.ToString())) + "}";
-            //            Console.WriteLine($"   Line: '{line.Content}', Bounding polygon {pointsToString}");
-
-            //            foreach (var word in line.Words)
-            //            {
-            //                pointsToString = "{" + string.Join(',', word.BoundingPolygon.Select(pointsToString => pointsToString.ToString())) + "}";
-            //                Console.WriteLine($"     Word: '{word.Content}', Bounding polygon {pointsToString}, Confidence {word.Confidence:0.0000}");
-            //            }
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    var errorDetails = ImageAnalysisErrorDetails.FromResult(result);
-            //    Console.WriteLine(" Analysis failed.");
-            //    Console.WriteLine($"   Error reason : {errorDetails.Reason}");
-            //    Console.WriteLine($"   Error code : {errorDetails.ErrorCode}");
-            //    Console.WriteLine($"   Error message: {errorDetails.Message}");
-            //}
+                if (result.Text != null)
+                {
+                    analysisResult.AppendLine("Text:");
+                    foreach (var line in result.Text.Lines)
+                    {
+                        analysisResult.AppendLine($"   Line: '{line.Content}'");
+                    }
+                }
+            }
+            else
+            {
+                var errorDetails = ImageAnalysisErrorDetails.FromResult(result);
+                analysisResult.AppendLine("Analysis failed.");
+                analysisResult.AppendLine($"   Error reason : {errorDetails.Reason}");
+                analysisResult.AppendLine($"   Error code : {errorDetails.ErrorCode}");
+                analysisResult.AppendLine($"   Error message: {errorDetails.Message}");
+                
+            }
+            Console.WriteLine(analysisResult.ToString());
         }
     }
 }
