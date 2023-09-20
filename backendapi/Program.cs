@@ -35,6 +35,7 @@ namespace backendapi
                                  builder =>
                                  {
                                      builder.WithOrigins("https://agreeable-meadow-0c593c303.3.azurestaticapps.net/",
+                                                         "https://agreeable-meadow-0c593c303.3.azurestaticapps.net",
                                                          "http://localhost:4200",
                                                          "localhost:4200",
                                                          "https://apibackendmartyannick.azurewebsites.net/api/v1/users")

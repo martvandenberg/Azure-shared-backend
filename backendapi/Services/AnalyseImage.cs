@@ -3,15 +3,18 @@ using Azure;
 using Azure.Identity;
 using Azure.AI.Vision.ImageAnalysis;
 using System.Text;
+using backendapi.Controllers;
 
 namespace backendapi.Services
 {
     public class AnalyseImage
     {
+        private readonly ILogger<AnalyseImage> _logger;
         private readonly IConfiguration _configuration;
 
-        public AnalyseImage(IConfiguration configuration)
+        public AnalyseImage(IConfiguration configuration, ILogger<AnalyseImage> logger)
         {
+            _logger = logger;
             _configuration = configuration;
         }
 
@@ -20,6 +23,7 @@ namespace backendapi.Services
 
         public void AnalyseImageWithAi(string urlSasString)
         {
+            _logger.LogInformation($"LOG INFO. urls {urlSasString}");
             StringBuilder analysisResult = new StringBuilder();
             analysisResult.AppendLine("Starting image analysing tool Ai");
             Console.WriteLine($"{urlSasString}");
@@ -33,7 +37,7 @@ namespace backendapi.Services
 
 
             using var imageSource =  VisionSource.FromUrl(urlSasString);
-            using var imageSource2 = VisionSource.FromUrl("https://aka.ms/azai/vision/image-analysis-sample.jpg");
+            //using var imageSource2 = VisionSource.FromUrl("https://aka.ms/azai/vision/image-analysis-sample.jpg");
 
 
 
@@ -74,6 +78,7 @@ namespace backendapi.Services
                 analysisResult.AppendLine($"   Error message: {errorDetails.Message}");
                 
             }
+            _logger.LogInformation($"LOG INFO. {analysisResult.ToString()}");
             Console.WriteLine(analysisResult.ToString());
         }
     }

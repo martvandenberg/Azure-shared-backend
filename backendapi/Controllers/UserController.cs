@@ -45,7 +45,7 @@ namespace backendapi.Controllers
                 string uriSassToken = _blobStorageService.GenerateSasToken(_blobStorageService.getBlobClient(userForm.Picture));
 
                 _analyseImage.AnalyseImageWithAi(uriSassToken);
-                
+
             } else
             {
                 Console.WriteLine("picture is null");
