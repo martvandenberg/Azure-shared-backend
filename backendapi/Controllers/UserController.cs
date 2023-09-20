@@ -1,6 +1,8 @@
 ﻿using Azure.Identity;
 using Azure.Storage;
 using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
+using backendapi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +14,18 @@ namespace backendapi.Controllers
     [Route("api/v1/users")]
     public class UserController : Controller
     {
-
+        private readonly AnalyseImage _analyseImage;
         private readonly ILogger<UserController> _logger;
         private BlobStorageService _blobStorageService;
+        //Update the storageAccountName value that you recorded previously in this lab.
+        private string storageAccountName = "storageyannickmart";
 
-        public UserController(ILogger<UserController> logger, BlobStorageService blobService)
+        //Update the storageAccountKey value that you recorded previously in this lab.
+        private string storageAccountKey = "mCFiy7p3Lv0qwnLvo84LX21Jz/4kMV9Bh/zVKDl1drRdQJeJ5/hb0pAPS6Dz0/Xxuy/Vw6EhTLP++AStMIExNw==";
+
+        public UserController(ILogger<UserController> logger, BlobStorageService blobService, AnalyseImage analyseImage)
         {
+            _analyseImage = analyseImage;
             _logger = logger;
             _blobStorageService = blobService;
         }
@@ -34,6 +42,9 @@ namespace backendapi.Controllers
             if (userForm.Picture != null)
             {
                 await _blobStorageService.UploadImage(userForm.Picture);
+                string uriSassToken = _blobStorageService.GenerateSasToken(_blobStorageService.getBlobClient(userForm.Picture));
+
+                _analyseImage.AnalyseImageWithAi(uriSassToken);
                 
             } else
             {
@@ -50,6 +61,9 @@ namespace backendapi.Controllers
             public string LicensePlate { get; set; }
             public IFormFile? Picture { get; set; }
         }
+
+        
+
 
 
     }

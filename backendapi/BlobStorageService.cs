@@ -1,5 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Azure.Storage.Sas;
 
 namespace backendapi
 {
@@ -18,12 +20,40 @@ namespace backendapi
             StorageSharedKeyCredential accountCredentials = new StorageSharedKeyCredential(storageAccountName, storageAccountKey);
             BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobServiceEndpoint), accountCredentials);
             var containerClient = blobServiceClient.GetBlobContainerClient("image");
+            //string randomkey = new Guid().ToString();
             var blobClient = containerClient.GetBlobClient(Picture.FileName);
 
             using (var stream = Picture.OpenReadStream())
             {
                 var res = await blobClient.UploadAsync(stream);
             }
+
+        }
+
+        public BlobClient getBlobClient(IFormFile Picture)
+        {
+            StorageSharedKeyCredential accountCredentials = new StorageSharedKeyCredential(storageAccountName, storageAccountKey);
+            BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobServiceEndpoint), accountCredentials);
+            var containerClient = blobServiceClient.GetBlobContainerClient("image");
+            return containerClient.GetBlobClient(Picture.FileName);
+        }
+
+        public string GenerateSasToken(BlobClient blobClient)
+        {
+            var sasBuilder = new BlobSasBuilder()
+            {
+                BlobContainerName = blobClient.BlobContainerName,
+                BlobName = blobClient.Name,
+                Resource = "b",
+                StartsOn = DateTimeOffset.UtcNow,
+                ExpiresOn = DateTimeOffset.UtcNow.AddHours(1), // 1 hour expiry
+            };
+
+            sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+            var sasToken = sasBuilder.ToSasQueryParameters(new StorageSharedKeyCredential(storageAccountName, storageAccountKey)).ToString();
+
+            return $"{blobClient.Uri}?{sasToken}";
         }
     }
 }
