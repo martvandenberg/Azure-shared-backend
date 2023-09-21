@@ -32,7 +32,7 @@ namespace yannickmartfunctions
                 Connection = "ConnectionStrings:cosmosdb")]out dynamic document, ILogger log)
         {
             Persoon? persoon = JsonSerializer.Deserialize<Persoon>(myQueueItem);
-            document = new { id = Guid.NewGuid().ToString(), FirstName = persoon.FirstName, LastName = persoon.LastName, LicensePlate = persoon.LicensePlate, ImageUrl = persoon.ImageUrl, Analysis = persoon.AnalysisResult };
+            document = new { id = Guid.NewGuid().ToString(), FirstName = persoon.FirstName, LastName = persoon.LastName, LicensePlate = persoon.LicensePlate, ImageUrl = persoon.ImageUrl, Analysis = persoon.AnalysisResult, Merk = persoon.Merk };
             log.LogInformation($"Document: {document}");
             log.LogInformation($"Document: {document.LicensePlate}");
             log.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
@@ -45,6 +45,8 @@ namespace yannickmartfunctions
         public string LicensePlate { get; set; }
         public string ImageUrl { get; set; }
         public string AnalysisResult { get; set; }
+
+        public string Merk { get; set; }
 
     }
 }

@@ -14,7 +14,7 @@ namespace backendapi.Services
         public QueueService(KeyVaultService keyVaultService) {
             _keyVaultService = keyVaultService;
         }
-        public async Task addToQueue(UserFormModel user, string pictureUrl, string AiData)
+        public async Task addToQueue(UserFormModel user, string pictureUrl, string AiData, LicensePlateJson licensePlateJson)
         {
             string storageconnectionString = await _keyVaultService.GetSecret("storageaccountconnectionstring");
 
@@ -28,7 +28,8 @@ namespace backendapi.Services
                         user.LastName,
                         user.LicensePlate,
                         pictureUrl,
-                        AiData
+                        AiData,
+                        licensePlateJson.Merk
                     )
                 );
             await queueClient.SendMessageAsync(jsonString);
@@ -40,6 +41,7 @@ namespace backendapi.Services
         string LastName,
         string LicensePlate,
         string ImageUrl,
-        string AnalysisResult
+        string AnalysisResult,
+        string MerkLicensePlate
     );
 }

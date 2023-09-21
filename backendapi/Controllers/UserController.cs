@@ -14,6 +14,7 @@ namespace backendapi.Controllers
     [Route("api/v1/users")]
     public class UserController : Controller
     {
+        private readonly LicensePlateService _licensePlateService;
         private readonly AnalyseImage _analyseImage;
         private readonly ILogger<UserController> _logger;
         private BlobStorageService _blobStorageService;
@@ -25,8 +26,9 @@ namespace backendapi.Controllers
         //Update the storageAccountKey value that you recorded previously in this lab.
         private string storageAccountKey = "mCFiy7p3Lv0qwnLvo84LX21Jz/4kMV9Bh/zVKDl1drRdQJeJ5/hb0pAPS6Dz0/Xxuy/Vw6EhTLP++AStMIExNw==";
 
-        public UserController(ILogger<UserController> logger, BlobStorageService blobService, AnalyseImage analyseImage, QueueService queueService, KeyVaultService keyVaultService)
+        public UserController(ILogger<UserController> logger, BlobStorageService blobService, AnalyseImage analyseImage, QueueService queueService, KeyVaultService keyVaultService, LicensePlateService licensePlateService)
         {
+            _licensePlateService = licensePlateService;
             _analyseImage = analyseImage;
             _logger = logger;
             _blobStorageService = blobService;
@@ -43,6 +45,7 @@ namespace backendapi.Controllers
             Console.WriteLine($"First Name: {userForm.FirstName}");
             Console.WriteLine($"Last Name: {userForm.LastName}");
             Console.WriteLine($"License Plate: {userForm.LicensePlate}");
+            LicensePlateJson licenseplate = await _licensePlateService.GetJsonAsync(userForm.LicensePlate);
             string analysis = "";
             if (userForm.Picture != null)
             {
@@ -52,7 +55,7 @@ namespace backendapi.Controllers
 
                 analysis = _analyseImage.AnalyseImageWithAi(uriSassToken);
 
-                await _queueService.addToQueue(userForm, client.Uri.ToString(), analysis);
+                await _queueService.addToQueue(userForm, client.Uri.ToString(), analysis, licenseplate);
             } else
             {
                 Console.WriteLine("picture is null");
