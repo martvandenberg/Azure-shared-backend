@@ -27,6 +27,7 @@ namespace backendapi
 
             builder.Services.AddTransient<BlobStorageService>();
             builder.Services.AddTransient<QueueService>();
+            builder.Services.AddTransient<keyVaultService>();
 
            //Add services to the container.
            builder.Services.AddCors(options =>

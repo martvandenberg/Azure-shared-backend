@@ -10,10 +10,13 @@ namespace backendapi.Services
 {
     public class QueueService
     {
+        private readonly keyVaultService _keyVaultService;
+        public QueueService(keyVaultService keyVaultService) {
+            _keyVaultService = keyVaultService;
+        }
         public async Task addToQueue(UserFormModel user, string pictureUrl, string AiData)
         {
-            string storageconnectionString = "DefaultEndpointsProtocol=https;AccountName=storageyannickmart;AccountKey=mCFiy7p3Lv0qwnLvo84LX21Jz/4kMV9Bh/zVKDl1drRdQJeJ5/hb0pAPS6Dz0/Xxuy/Vw6EhTLP++AStMIExNw==;EndpointSuffix=core.windows.net";
-            // Instantiate a QueueClient to create and interact with the queue
+            string storageconnectionString = _keyVaultService.GetSecret("storageaccountconnectionstring");
             QueueClient queueClient = new QueueClient(storageconnectionString, "personen");
             string jsonString = JsonSerializer.Serialize(
                     new QueueItem(
