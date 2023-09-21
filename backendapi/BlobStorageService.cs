@@ -3,6 +3,8 @@ using Azure.Storage;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Azure.Storage.Sas;
 using Azure.Storage.Blobs.Models;
+using Azure.Security.KeyVault.Secrets;
+using backendapi.Services;
 
 namespace backendapi
 {
@@ -14,11 +16,25 @@ namespace backendapi
         private string storageAccountName = "storageyannickmart";
 
         //Update the storageAccountKey value that you recorded previously in this lab.
-        private string storageAccountKey = "mCFiy7p3Lv0qwnLvo84LX21Jz/4kMV9Bh/zVKDl1drRdQJeJ5/hb0pAPS6Dz0/Xxuy/Vw6EhTLP++AStMIExNw==";
+        //private string storageAccountKey = "mCFiy7p3Lv0qwnLvo84LX21Jz/4kMV9Bh/zVKDl1drRdQJeJ5/hb0pAPS6Dz0/Xxuy/Vw6EhTLP++AStMIExNw==";
+
+        private readonly KeyVaultService _keyVaultService;
+
+        private readonly string _connectionStringKey;
+
+        public BlobStorageService(KeyVaultService keyVaultService)
+        {
+            _keyVaultService = keyVaultService;
+            _connectionStringKey = _keyVaultService.GetSecret("storageaccountkey");
+        }
+
         public async Task UploadImage(IFormFile Picture)
         {
+            
+
+
             Console.WriteLine($"Picture Length: {Picture.Length}");
-            StorageSharedKeyCredential accountCredentials = new StorageSharedKeyCredential(storageAccountName, storageAccountKey);
+            StorageSharedKeyCredential accountCredentials = new StorageSharedKeyCredential(storageAccountName, _connectionStringKey);
             BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobServiceEndpoint), accountCredentials);
             var containerClient = blobServiceClient.GetBlobContainerClient("image");
             //string randomkey = new Guid().ToString();
@@ -42,7 +58,7 @@ namespace backendapi
 
         public BlobClient getBlobClient(IFormFile Picture)
         {
-            StorageSharedKeyCredential accountCredentials = new StorageSharedKeyCredential(storageAccountName, storageAccountKey);
+            StorageSharedKeyCredential accountCredentials = new StorageSharedKeyCredential(storageAccountName, _connectionStringKey);
             BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobServiceEndpoint), accountCredentials);
             var containerClient = blobServiceClient.GetBlobContainerClient("image");
             return containerClient.GetBlobClient(Picture.FileName);
@@ -61,7 +77,7 @@ namespace backendapi
 
             sasBuilder.SetPermissions(BlobSasPermissions.Read);
 
-            var sasToken = sasBuilder.ToSasQueryParameters(new StorageSharedKeyCredential(storageAccountName, storageAccountKey)).ToString();
+            var sasToken = sasBuilder.ToSasQueryParameters(new StorageSharedKeyCredential(storageAccountName, _connectionStringKey)).ToString();
 
             return $"{blobClient.Uri}?{sasToken}";
         }
