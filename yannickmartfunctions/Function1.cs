@@ -32,7 +32,7 @@ namespace yannickmartfunctions
                 Connection = "ConnectionStrings:cosmosdb")]out dynamic document, ILogger log)
         {
             Persoon? persoon = JsonSerializer.Deserialize<Persoon>(myQueueItem);
-            document = new { Id = Guid.NewGuid().ToString(), persoon };
+            document = new { Id = Guid.NewGuid().ToString(), persoon.FirstName, persoon.LastName, persoon.LicensePlate, persoon.ImageUrl, persoon.AnalysisResult };
             log.LogInformation($"Document: {document}");
             log.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
         }
