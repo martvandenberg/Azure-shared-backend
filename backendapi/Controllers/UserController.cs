@@ -17,17 +17,19 @@ namespace backendapi.Controllers
         private readonly AnalyseImage _analyseImage;
         private readonly ILogger<UserController> _logger;
         private BlobStorageService _blobStorageService;
+        private readonly QueueService _queueService;
         //Update the storageAccountName value that you recorded previously in this lab.
         private string storageAccountName = "storageyannickmart";
 
         //Update the storageAccountKey value that you recorded previously in this lab.
         private string storageAccountKey = "mCFiy7p3Lv0qwnLvo84LX21Jz/4kMV9Bh/zVKDl1drRdQJeJ5/hb0pAPS6Dz0/Xxuy/Vw6EhTLP++AStMIExNw==";
 
-        public UserController(ILogger<UserController> logger, BlobStorageService blobService, AnalyseImage analyseImage)
+        public UserController(ILogger<UserController> logger, BlobStorageService blobService, AnalyseImage analyseImage, QueueService queueService)
         {
             _analyseImage = analyseImage;
             _logger = logger;
             _blobStorageService = blobService;
+            _queueService = queueService;
         }
 
         //[Authorize]
@@ -42,10 +44,12 @@ namespace backendapi.Controllers
             if (userForm.Picture != null)
             {
                 await _blobStorageService.UploadImage(userForm.Picture);
-                string uriSassToken = _blobStorageService.GenerateSasToken(_blobStorageService.getBlobClient(userForm.Picture));
+                var client = _blobStorageService.getBlobClient(userForm.Picture);
+                string uriSassToken = _blobStorageService.GenerateSasToken(client);
 
-                _analyseImage.AnalyseImageWithAi(uriSassToken);
+                string analysis = _analyseImage.AnalyseImageWithAi(uriSassToken);
 
+                await _queueService.addToQueue(userForm, client.Uri.ToString(), analysis);
             } else
             {
                 Console.WriteLine("picture is null");

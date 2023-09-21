@@ -18,10 +18,7 @@ namespace backendapi.Services
             _configuration = configuration;
         }
 
-        
-
-
-        public void AnalyseImageWithAi(string urlSasString)
+        public string? AnalyseImageWithAi(string urlSasString)
         {
             _logger.LogInformation($"LOG INFO. urls {urlSasString}");
             StringBuilder analysisResult = new StringBuilder();
@@ -80,6 +77,7 @@ namespace backendapi.Services
             }
             _logger.LogInformation($"LOG INFO. {analysisResult.ToString()}");
             Console.WriteLine(analysisResult.ToString());
+            return result.Caption?.Content;
         }
     }
 }
