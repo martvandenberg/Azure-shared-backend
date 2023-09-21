@@ -18,7 +18,10 @@ namespace backendapi.Services
         {
             string storageconnectionString = await _keyVaultService.GetSecret("storageaccountconnectionstring");
 
-            QueueClient queueClient = new QueueClient(storageconnectionString, "personen");
+            QueueClient queueClient = new QueueClient(storageconnectionString, "personen", new QueueClientOptions
+            {
+                MessageEncoding = QueueMessageEncoding.Base64
+            });
             string jsonString = JsonSerializer.Serialize(
                     new QueueItem(
                         user.FirstName,
