@@ -25,7 +25,7 @@ namespace backendapi
         public BlobStorageService(KeyVaultService keyVaultService)
         {
             _keyVaultService = keyVaultService;
-            _connectionStringKey = _keyVaultService.GetSecret("storageaccountkey");
+            _connectionStringKey = _keyVaultService.GetSecret("storageaccountkey").Result;
         }
 
         public async Task UploadImage(IFormFile Picture)

@@ -14,10 +14,10 @@ namespace backendapi.Services
             _logger = logger;
         }
 
-        public string GetSecret(string secretName)
+        public async Task<string> GetSecret(string secretName)
         {
             var client = new SecretClient(new Uri("https://keyvaultyannickmart.vault.azure.net/"), new DefaultAzureCredential());
-            KeyVaultSecret secret = client.GetSecret(secretName);
+            KeyVaultSecret secret = await client.GetSecretAsync(secretName);
             _logger.LogInformation($"secret(value): {secret.Value} and key(name): {secret.Name}");
             //Console.WriteLine($"secret: {secret.Value}");
             //Console.WriteLine($"key: {secret.Name}");

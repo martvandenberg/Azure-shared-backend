@@ -16,7 +16,7 @@ namespace backendapi.Services
         }
         public async Task addToQueue(UserFormModel user, string pictureUrl, string AiData)
         {
-            string storageconnectionString = _keyVaultService.GetSecret("storageaccountconnectionstring");
+            string storageconnectionString = await _keyVaultService.GetSecret("storageaccountconnectionstring");
 
             QueueClient queueClient = new QueueClient(storageconnectionString, "personen");
             string jsonString = JsonSerializer.Serialize(

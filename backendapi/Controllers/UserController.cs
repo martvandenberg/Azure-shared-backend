@@ -43,13 +43,14 @@ namespace backendapi.Controllers
             Console.WriteLine($"First Name: {userForm.FirstName}");
             Console.WriteLine($"Last Name: {userForm.LastName}");
             Console.WriteLine($"License Plate: {userForm.LicensePlate}");
+            string analysis = "";
             if (userForm.Picture != null)
             {
                 await _blobStorageService.UploadImage(userForm.Picture);
                 var client = _blobStorageService.getBlobClient(userForm.Picture);
                 string uriSassToken = _blobStorageService.GenerateSasToken(client);
 
-                string analysis = _analyseImage.AnalyseImageWithAi(uriSassToken);
+                analysis = _analyseImage.AnalyseImageWithAi(uriSassToken);
 
                 await _queueService.addToQueue(userForm, client.Uri.ToString(), analysis);
             } else
@@ -57,7 +58,7 @@ namespace backendapi.Controllers
                 Console.WriteLine("picture is null");
             }            
 
-            return Ok(new { message = "Data received" });
+            return Ok(new { message = analysis });
         }
 
         public class UserFormModel
