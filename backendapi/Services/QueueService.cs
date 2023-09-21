@@ -38,7 +38,7 @@ namespace backendapi.Services
     public record QueueItem(
         string FirstName,
         string LastName,
-        string LicencePlate,
+        string LicensePlate,
         string ImageUrl,
         string AnalysisResult
     );
