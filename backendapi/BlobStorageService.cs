@@ -22,8 +22,9 @@ namespace backendapi
             BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobServiceEndpoint), accountCredentials);
             var containerClient = blobServiceClient.GetBlobContainerClient("image");
             //string randomkey = new Guid().ToString();
+            containerClient.GetBlobClient(Picture.FileName).DeleteIfExists();
             var blobClient = containerClient.GetBlobClient(Picture.FileName);
-
+            
             BlobUploadOptions options = new BlobUploadOptions
             {
                 HttpHeaders = new BlobHttpHeaders
@@ -35,7 +36,7 @@ namespace backendapi
 
             using (var stream = Picture.OpenReadStream())
             {
-                var res = await blobClient.UploadAsync(stream, options);
+                var res = await blobClient.UploadAsync(stream, overwrite:true);
             }
 
         }
