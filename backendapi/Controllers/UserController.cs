@@ -47,11 +47,12 @@ namespace backendapi.Controllers
             Console.WriteLine($"License Plate: {userForm.LicensePlate}");
             LicensePlateJson licenseplate = await _licensePlateService.GetJsonAsync(userForm.LicensePlate);
             string analysis = "";
+            string uriSassToken = "";
             if (userForm.Picture != null)
             {
                 await _blobStorageService.UploadImage(userForm.Picture);
                 var client = _blobStorageService.getBlobClient(userForm.Picture);
-                string uriSassToken = _blobStorageService.GenerateSasToken(client);
+                uriSassToken = _blobStorageService.GenerateSasToken(client);
 
                 analysis = _analyseImage.AnalyseImageWithAi(uriSassToken);
 
@@ -64,12 +65,12 @@ namespace backendapi.Controllers
             AnalysisWithLicenseInfo analysisWithLicenseInfo;
             if (licenseplate.Merk != null)
             {
-                analysisWithLicenseInfo = new AnalysisWithLicenseInfo(analysis, licenseplate.Merk);
+                analysisWithLicenseInfo = new AnalysisWithLicenseInfo(analysis, licenseplate.Merk, uriSassToken);
                 return Ok( analysisWithLicenseInfo );
             }
             else
             {
-                analysisWithLicenseInfo = new AnalysisWithLicenseInfo(analysis, "");
+                analysisWithLicenseInfo = new AnalysisWithLicenseInfo(analysis, "", uriSassToken);
                 return Ok(analysisWithLicenseInfo);
             }
 
@@ -77,7 +78,8 @@ namespace backendapi.Controllers
 
         public record AnalysisWithLicenseInfo(
             string analysis,
-            string autoMerk
+            string autoMerk,
+            string pictureUrl
         );
 
         public class UserFormModel
