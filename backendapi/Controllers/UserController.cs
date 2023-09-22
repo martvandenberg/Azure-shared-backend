@@ -59,10 +59,26 @@ namespace backendapi.Controllers
             } else
             {
                 Console.WriteLine("picture is null");
-            }            
+            }
 
-            return Ok(new { message = analysis });
+            AnalysisWithLicenseInfo analysisWithLicenseInfo;
+            if (licenseplate.Merk != null)
+            {
+                analysisWithLicenseInfo = new AnalysisWithLicenseInfo(analysis, licenseplate.Merk);
+                return Ok( analysisWithLicenseInfo );
+            }
+            else
+            {
+                analysisWithLicenseInfo = new AnalysisWithLicenseInfo(analysis, "");
+                return Ok(analysisWithLicenseInfo);
+            }
+
         }
+
+        public record AnalysisWithLicenseInfo(
+            string analysis,
+            string autoMerk
+        );
 
         public class UserFormModel
         {
